@@ -4,28 +4,32 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-redis/redis/v8"
-	"github.com/spf13/viper"
+	"github.com/redis/go-redis/v9"
 )
+
+type Config struct {
+	Addr        string `koanf:"addr"`         // Required, Example: 127.0.0.1:6379
+	DisablePing bool   `koanf:"disable_ping"` // Optional, Default: false
+	Username    string `koanf:"username"`     // Optional, If empty, no username is used
+	Password    string `koanf:"password"`     // Optional, If empty, no password is used
+	DB          int    `koanf:"db"`           // Optional, Default: 0
+}
 
 type Handler func(*redis.Client)
 
-func NewRedisClient(handlers ...Handler) func(*viper.Viper) (*redis.Client, error) {
-	return func(v *viper.Viper) (client *redis.Client, err error) {
-		client = redis.NewClient(&redis.Options{
-			Addr:         v.GetString("redis.addr"),
-			Username:     v.GetString("redis.username"),
-			Password:     v.GetString("redis.password"),
-			DB:           v.GetInt("redis.db"),
-			ReadTimeout:  3 * time.Second,
-			WriteTimeout: 3 * time.Second,
-		})
-		for _, handle := range handlers {
-			handle(client)
-		}
+func New(conf Config) (client *redis.Client, err error) {
+	client = redis.NewClient(&redis.Options{
+		Addr:         conf.Addr,
+		Username:     conf.Username,
+		Password:     conf.Password,
+		DB:           conf.DB,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+	})
+	if !conf.DisablePing {
 		if err = client.Ping(context.TODO()).Err(); err != nil {
 			return
 		}
-		return
 	}
+	return
 }
