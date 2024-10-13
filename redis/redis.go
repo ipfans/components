@@ -15,8 +15,6 @@ type Config struct {
 	DB          int    `koanf:"db"`           // Optional, Default: 0
 }
 
-type Handler func(*redis.Client)
-
 func New(conf Config) (client *redis.Client, err error) {
 	client = redis.NewClient(&redis.Options{
 		Addr:         conf.Addr,

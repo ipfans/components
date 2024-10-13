@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/arthurkiller/rollingwriter"
+	"github.com/ipfans/components/lifecycle"
 	"github.com/ipfans/components/utils"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -22,20 +23,20 @@ import (
 )
 
 type OpenTelemetry struct {
-	Enabled     bool   `koanf:"enabled"`      // Optional, Default: false
-	PackageName string `koanf:"package_name"` // Optional, Default: empty. It will be used to filter the logs by package name.
-	Endpoint    string `koanf:"endpoint"`     // Optional, Default: empty. It will be required if OpenTelemetry is enabled.
-	AuthMethod  string `koanf:"auth_method"`  // Optional, Default: empty. One of "Bearer", "Basic", "Header", "".
-	AuthToken   string `koanf:"auth_token"`   // Optional, Default: empty.
-	AuthHeader  string `koanf:"auth_header"`  // Optional, Default: empty. It will be used when AuthMethod is "Header".
+	PackageName string `koanf:"package_name"`
+	Endpoint    string `koanf:"endpoint"`
+	AuthMethod  string `koanf:"auth_method"`
+	AuthToken   string `koanf:"auth_token"`
+	AuthHeader  string `koanf:"auth_header"`
+	Enabled     bool   `koanf:"enabled"`
 }
 
 type Config struct {
+	Output        string        `koanf:"output"`
+	Level         string        `koanf:"level"`
 	OpenTelemetry OpenTelemetry `koanf:"opentelemetry" mapstructure:",squash"`
-	NoGlobal      bool          `koanf:"no_global"` // do not replace `github.com/rs/zerolog/log.Logger` or register global logger.
-	NoColor       bool          `koanf:"no_color"`  // Disable color, it will be ignored if OpenTelemetry is enabled.
-	Output        string        `koanf:"output"`    // Output writer, Default: stdout. It can be "stdout", "stderr", or a file path.
-	Level         string        `koanf:"level"`     // Default level is zerolog.DebugLevel. Default: "info". It can be "debug", "info", "warn", "error", "fatal", "panic".
+	NoGlobal      bool          `koanf:"no_global"`
+	NoColor       bool          `koanf:"no_color"`
 }
 
 type option struct {
@@ -43,41 +44,48 @@ type option struct {
 	provider   otellog.LoggerProvider
 	loggerFunc func(logger zerolog.Logger) zerolog.Logger
 	otelAttrs  []attribute.KeyValue
+	lifecycle  lifecycle.Lifecycle
 }
 
-type Handler func(opt option)
+type Handler func(opt *option)
 
 // WithWriter to force use the given writer.
 func WithWriter(w io.Writer) Handler {
-	return func(opt option) {
+	return func(opt *option) {
 		opt.w = w
 	}
 }
 
 // WithProvider to force use the given provider.
 func WithProvider(provider otellog.LoggerProvider) Handler {
-	return func(opt option) {
+	return func(opt *option) {
 		opt.provider = provider
 	}
 }
 
 // ExtendLocalLogger to extend the local logger instance.
 func ExtendLocalLogger(fn func(logger zerolog.Logger) zerolog.Logger) Handler {
-	return func(opt option) {
+	return func(opt *option) {
 		opt.loggerFunc = fn
 	}
 }
 
 func WithOtelAttributes(attrs ...attribute.KeyValue) Handler {
-	return func(opt option) {
+	return func(opt *option) {
 		opt.otelAttrs = attrs
+	}
+}
+
+func WithLifecycle(lf lifecycle.Lifecycle) Handler {
+	return func(opt *option) {
+		opt.lifecycle = lf
 	}
 }
 
 // New returns a new zerolog.Logger instance. If a provider is provided, it will be used to create the logger. Notice: use context to close the provider and writer.
 func New(ctx context.Context, handlers ...Handler) func(conf Config) (zerolog.Logger, error) {
 	return func(conf Config) (logger zerolog.Logger, err error) {
-		opt := option{}
+		opt := &option{}
 		for _, handler := range handlers {
 			handler(opt)
 		}
@@ -145,15 +153,17 @@ func New(ctx context.Context, handlers ...Handler) func(conf Config) (zerolog.Lo
 			opt.provider = logProvider
 		}
 
-		go func() {
-			<-ctx.Done()
-			if writer != nil {
-				writer.Close()
-			}
-			if logExporter != nil {
-				logExporter.Shutdown(context.TODO())
-			}
-		}()
+		if opt.lifecycle != nil {
+			opt.lifecycle.Append(lifecycle.StopHook(func(ctx context.Context) error {
+				if writer != nil {
+					writer.Close()
+				}
+				if logExporter != nil {
+					logExporter.Shutdown(ctx)
+				}
+				return nil
+			}))
+		}
 
 		if conf.OpenTelemetry.Enabled {
 			// Use the first provider and ignore the rest opentelemetry configuration.
