@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/ipfans/components/utils"
+	"github.com/ipfans/components/v2/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

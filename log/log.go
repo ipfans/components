@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/arthurkiller/rollingwriter"
-	"github.com/ipfans/components/lifecycle"
-	"github.com/ipfans/components/utils"
+	"github.com/ipfans/components/v2/lifecycle"
+	"github.com/ipfans/components/v2/utils"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/contrib/bridges/otelzerolog"

@@ -1,7 +1,7 @@
 package natsclient
 
 import (
-	"github.com/ipfans/components/utils"
+	"github.com/ipfans/components/v2/utils"
 	"github.com/nats-io/nats.go"
 )
 

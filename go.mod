@@ -1,4 +1,4 @@
-module github.com/ipfans/components
+module github.com/ipfans/components/v2
 
 go 1.23.2
 
