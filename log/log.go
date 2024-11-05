@@ -42,9 +42,9 @@ type Config struct {
 type option struct {
 	w          io.Writer
 	provider   otellog.LoggerProvider
+	lifecycle  lifecycle.Lifecycle
 	loggerFunc func(logger zerolog.Logger) zerolog.Logger
 	otelAttrs  []attribute.KeyValue
-	lifecycle  lifecycle.Lifecycle
 }
 
 type Handler func(opt *option)

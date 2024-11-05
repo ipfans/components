@@ -2,14 +2,17 @@ package gorm
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/ipfans/components/v2/utils"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Config struct {
+	Driver          string        `koanf:"driver"`             // Optional, Example: mysql, postgres. Default: mysql
 	DSN             string        `koanf:"dsn"`                // Required, Example: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local
 	ConnMaxIdleTime time.Duration `koanf:"conn_max_idle_time"` // Optional, Default: 1 hour
 	ConnMaxLifetime time.Duration `koanf:"conn_max_lifetime"`  // Optional, Default: 24 hours
@@ -18,8 +21,17 @@ type Config struct {
 }
 
 func New(conf Config) (db *gorm.DB, err error) {
-	if db, err = gorm.Open(mysql.Open(conf.DSN)); err != nil {
-		return
+	switch conf.Driver {
+	case "mysql":
+		if db, err = gorm.Open(mysql.Open(conf.DSN)); err != nil {
+			return
+		}
+	case "postgres":
+		if db, err = gorm.Open(postgres.Open(conf.DSN)); err != nil {
+			return
+		}
+	default:
+		return nil, fmt.Errorf("unsupported driver: %s", conf.Driver)
 	}
 	var sqlDB *sql.DB
 	sqlDB, err = db.DB()
