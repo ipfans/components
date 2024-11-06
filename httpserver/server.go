@@ -1,13 +1,17 @@
 package httpserver
 
 import (
+	"context"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfans/components/v2/ctxkeys"
+	"github.com/ipfans/components/v2/lifecycle"
 	"github.com/ipfans/components/v2/utils"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type Config struct {
@@ -47,15 +51,52 @@ func LoggerMiddleware(getUid func(c *gin.Context) string, logger zerolog.Logger)
 	}
 }
 
-func New(cfg Config, handlers ...gin.HandlerFunc) *gin.Engine {
+func New(lc lifecycle.Lifecycle, cfg Config, handlers ...gin.HandlerFunc) *gin.Engine {
+	var srv *http.Server
 	if cfg.Production {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	if len(handlers) > 0 {
 		router := gin.New()
 		router.Use(handlers...)
+
+		srv = &http.Server{
+			Addr:    cfg.Address,
+			Handler: router,
+		}
+		lc.Append(lifecycle.Hook{
+			OnStart: func(ctx context.Context) error {
+				go func() {
+					if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+						log.Fatal().Err(err).Msg("Start http server failed")
+					}
+				}()
+				return nil
+			},
+			OnStop: func(_ context.Context) error {
+				return srv.Close()
+			},
+		})
 		return router
 	}
 	router := gin.Default()
+
+	srv = &http.Server{
+		Addr:    cfg.Address,
+		Handler: router,
+	}
+	lc.Append(lifecycle.Hook{
+		OnStart: func(ctx context.Context) error {
+			go func() {
+				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+					log.Fatal().Err(err).Msg("Start http server failed")
+				}
+			}()
+			return nil
+		},
+		OnStop: func(_ context.Context) error {
+			return srv.Close()
+		},
+	})
 	return router
 }
