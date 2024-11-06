@@ -88,6 +88,7 @@ func New(lc lifecycle.Lifecycle, cfg Config, handlers ...gin.HandlerFunc) *gin.E
 	lc.Append(lifecycle.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
+				log.Info().Msgf("Start http server on %s", cfg.Address)
 				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 					log.Fatal().Err(err).Msg("Start http server failed")
 				}
