@@ -17,13 +17,13 @@ import (
 )
 
 type Config struct {
-	UserAgent          string        `koanf:"user_agent"`            // User agent, Default: HttpClient/1.0
-	Timeout            time.Duration `koanf:"timeout"`               // Timeout, Default: 60 seconds
-	RetryCount         int           `koanf:"retry_count"`           // Retry count, Default: 3
-	Debug              bool          `koanf:"debug"`                 // Enable debug log, include request and response. Default: false
-	DisableRetry       bool          `koanf:"disable_retry"`         // Disable retry, Default: false
-	LogAllResponse     bool          `koanf:"log_all_response"`      // Log all response body, Default only json/xml. It only works when debug is true. Default: false
-	MaxRequestBodySize int64         `koanf:"max_request_body_size"` // Max request body size, Default: 5 * 1024 (5KB)
+	UserAgent          string        `koanf:"UserAgent"`          // User agent, Default: HttpClient/1.0
+	Timeout            time.Duration `koanf:"timeout"`            // Timeout, Default: 60 seconds
+	RetryCount         int           `koanf:"RetryCount"`         // Retry count, Default: 3
+	Debug              bool          `koanf:"debug"`              // Enable debug log, include request and response. Default: false
+	DisableRetry       bool          `koanf:"DisableRetry"`       // Disable retry, Default: false
+	LogAllResponse     bool          `koanf:"LogAllResponse"`     // Log all response body, Default only json/xml. It only works when debug is true. Default: false
+	MaxRequestBodySize int64         `koanf:"MaxRequestBodySize"` // Max request body size, Default: 5 * 1024 (5KB)
 }
 
 type Option func(*options)

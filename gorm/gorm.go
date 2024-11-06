@@ -12,12 +12,12 @@ import (
 )
 
 type Config struct {
-	Driver          string        `koanf:"driver"`             // Optional, Example: mysql, postgres. Default: mysql
-	DSN             string        `koanf:"dsn"`                // Required, Example: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local
-	ConnMaxIdleTime time.Duration `koanf:"conn_max_idle_time"` // Optional, Default: 1 hour
-	ConnMaxLifetime time.Duration `koanf:"conn_max_lifetime"`  // Optional, Default: 24 hours
-	MaxIdleConns    int           `koanf:"max_idle_conns"`     // Optional, Default: 10
-	MaxOpenConns    int           `koanf:"max_open_conns"`     // Optional, Default: 100
+	Driver          string        `koanf:"driver"`          // Optional, Example: mysql, postgres. Default: mysql
+	DSN             string        `koanf:"dsn"`             // Required, Example: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local
+	ConnMaxIdleTime time.Duration `koanf:"ConnMaxIdleTime"` // Optional, Default: 1 hour
+	ConnMaxLifetime time.Duration `koanf:"ConnMaxIdleTime"` // Optional, Default: 24 hours
+	MaxIdleConns    int           `koanf:"MaxIdleConns"`    // Optional, Default: 10
+	MaxOpenConns    int           `koanf:"MaxOpenConns"`    // Optional, Default: 100
 }
 
 func New(conf Config) (db *gorm.DB, err error) {

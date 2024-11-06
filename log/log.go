@@ -23,20 +23,20 @@ import (
 )
 
 type OpenTelemetry struct {
-	PackageName string `koanf:"package_name"`
+	PackageName string `koanf:"PackageName"`
 	Endpoint    string `koanf:"endpoint"`
-	AuthMethod  string `koanf:"auth_method"`
-	AuthToken   string `koanf:"auth_token"`
-	AuthHeader  string `koanf:"auth_header"`
-	Enabled     bool   `koanf:"enabled"`
+	AuthMethod  string `koanf:"AuthMethod"`
+	AuthToken   string `koanf:"AuthToken"`
+	AuthHeader  string `koanf:"AuthHeader"`
+	Enabled     bool   `koanf:"Enabled"`
 }
 
 type Config struct {
 	Output        string        `koanf:"output"`
 	Level         string        `koanf:"level"`
 	OpenTelemetry OpenTelemetry `koanf:"opentelemetry" mapstructure:",squash"`
-	NoGlobal      bool          `koanf:"no_global"`
-	NoColor       bool          `koanf:"no_color"`
+	NoGlobal      bool          `koanf:"NoGlobal"`
+	NoColor       bool          `koanf:"NoColor"`
 }
 
 type option struct {

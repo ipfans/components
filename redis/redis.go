@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
-	Addr        string `koanf:"addr"`         // Required, Example: 127.0.0.1:6379
-	DisablePing bool   `koanf:"disable_ping"` // Optional, Default: false
-	Username    string `koanf:"username"`     // Optional, If empty, no username is used
-	Password    string `koanf:"password"`     // Optional, If empty, no password is used
-	DB          int    `koanf:"db"`           // Optional, Default: 0
+	Addr        string `koanf:"addr"`        // Required, Example: 127.0.0.1:6379
+	DisablePing bool   `koanf:"DisablePing"` // Optional, Default: false
+	Username    string `koanf:"username"`    // Optional, If empty, no username is used
+	Password    string `koanf:"password"`    // Optional, If empty, no password is used
+	DB          int    `koanf:"db"`          // Optional, Default: 0
 }
 
 func New(conf Config) (client *redis.Client, err error) {
