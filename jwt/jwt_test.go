@@ -60,7 +60,7 @@ func TestManager_Generate_And_Parser(t *testing.T) {
 	require.NotEmpty(t, id)
 
 	// Test Parser
-	claims, err := manager.Parser(token)
+	claims, err := manager.Parse(token)
 	require.NoError(t, err)
 	require.Equal(t, "123", claims.Subject)
 	require.NotNil(t, claims.IssuedAt)
@@ -68,7 +68,7 @@ func TestManager_Generate_And_Parser(t *testing.T) {
 	require.Equal(t, id, claims.ID)
 
 	// Test invalid token
-	_, err = manager.Parser("invalid-token")
+	_, err = manager.Parse("invalid-token")
 	require.Error(t, err)
 }
 
@@ -107,7 +107,7 @@ func TestManager_Different_Algorithms(t *testing.T) {
 			token, _, err := manager.Generate(123)
 			require.NoError(t, err)
 
-			claims, err := manager.Parser(token)
+			claims, err := manager.Parse(token)
 			require.NoError(t, err)
 			require.Equal(t, "123", claims.Subject)
 		})
