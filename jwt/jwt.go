@@ -13,7 +13,7 @@ import (
 
 type Manager struct {
 	sig jose.Signer
-	cfg *Config
+	cfg Config
 }
 
 type Config struct {
@@ -30,7 +30,7 @@ func cutOrPaddingKey(key string, length int) string {
 	return key[:length]
 }
 
-func New(cfg *Config) *Manager {
+func New(cfg Config) *Manager {
 	cfg.Expire = utils.DefaultValue(cfg.Expire, time.Hour*24)
 	cfg.Algorithm = utils.DefaultValue(cfg.Algorithm, "HS256")
 
@@ -76,7 +76,7 @@ func (m *Manager) Generate(userID uint) (string, string, error) {
 }
 
 // Parser parses the JWT token and returns the claims.
-func (m *Manager) Parser(token string) (jwt.Claims, error) {
+func (m *Manager) Parse(token string) (jwt.Claims, error) {
 	var claims jwt.Claims
 	parsed, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.SignatureAlgorithm(m.cfg.Algorithm)})
 	if err != nil {

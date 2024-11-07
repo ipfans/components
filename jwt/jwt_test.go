@@ -10,12 +10,12 @@ import (
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name      string
-		cfg       *Config
+		cfg       Config
 		wantPanic bool
 	}{
 		{
 			name: "valid HS256",
-			cfg: &Config{
+			cfg: Config{
 				SecretKey: "test-secret",
 				Algorithm: "HS256",
 				Expire:    time.Hour,
@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 		},
 		{
 			name: "invalid algorithm",
-			cfg: &Config{
+			cfg: Config{
 				SecretKey: "test-secret-key-must-be-at-least-32-bytes",
 				Algorithm: "INVALID",
 				Expire:    time.Hour,
@@ -45,7 +45,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestManager_Generate_And_Parser(t *testing.T) {
-	cfg := &Config{
+	cfg := Config{
 		SecretKey: "test-secret-key-must-be-at-least-32-bytes",
 		Algorithm: "HS256",
 		Expire:    time.Hour,
@@ -97,7 +97,7 @@ func TestManager_Different_Algorithms(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg := &Config{
+			cfg := Config{
 				SecretKey: tt.key,
 				Algorithm: tt.algorithm,
 				Expire:    time.Hour,
